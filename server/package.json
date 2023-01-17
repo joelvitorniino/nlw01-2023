@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "ts-node src/server.ts"
+    "dev": "ts-node src/server.ts --watch"
   },
   "dependencies": {
     "@prisma/client": "^4.9.0",
