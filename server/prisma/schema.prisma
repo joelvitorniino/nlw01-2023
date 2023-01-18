@@ -15,7 +15,7 @@ model Habit {
   title      String
   created_at DateTime
 
-  dayHanits     DayHabit[]
+  dayHabits     DayHabit[]
   weekDays HabitWeekDays[]
 
   @@map("habits")
