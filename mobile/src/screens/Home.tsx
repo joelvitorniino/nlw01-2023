@@ -9,7 +9,7 @@ const datesFromYearStart = generateRangeDatesFromYearStart();
 const minimumSummaryDatesSize = 18 * 5;
 const amountOfDaysToFill = minimumSummaryDatesSize - datesFromYearStart.length;
 
-export function Home() {
+export default function Home() {
   return (
     <View className="flex-1 bg-background px-8 pt-16">
       <Header />
@@ -39,6 +39,7 @@ export function Home() {
               return (
                 <View
                   className="bg-zinc-900 rounded-lg border-2 m-1 border-zinc-800 opacity-40"
+                  key={i}
                   style={{ width: DAY_SIZE, height: DAY_SIZE }}
                 />
               );
