@@ -1,8 +1,12 @@
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, Alert } from "react-native";
 import Header from "../components/Header";
 import HabitDay, { DAY_SIZE } from "../components/HabitDay";
 import { generateRangeDatesFromYearStart } from "../utils/generate-range-between-dates";
 import { useNavigation } from '@react-navigation/native';
+import { api } from "../lib/axios";
+import { useEffect, useState } from "react";
+import Loading from "../components/Loading";
+import dayjs from "dayjs";
 
 const weekDays = ["D", "S", "T", "Q", "Q", "S", "S"];
 const datesFromYearStart = generateRangeDatesFromYearStart();
@@ -10,8 +14,42 @@ const datesFromYearStart = generateRangeDatesFromYearStart();
 const minimumSummaryDatesSize = 18 * 5;
 const amountOfDaysToFill = minimumSummaryDatesSize - datesFromYearStart.length;
 
+type SummaryProps = Array<{
+  id: string;
+  date: string;
+  amount: number;
+  completed: number;
+}>;
+
 export default function Home() {
+  const [loading, setLoading] = useState(true);
+  const [summary, setSummary] = useState<SummaryProps | null>(null);
+
   const { navigate } = useNavigation()
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('summary');
+
+      setSummary(response.data);
+    } catch(e) {
+      Alert.alert('Ops', 'Não foi possível carregar o sumário de hábitos.');
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  if(loading) {
+    return (
+      <Loading />
+    )
+  }
 
   return (
     <View className="flex-1 bg-background px-8 pt-16">
@@ -32,9 +70,14 @@ export default function Home() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+        { summary &&
         <View className="flex-row flex-wrap">
           {datesFromYearStart.map((date) => {
-            return <HabitDay key={date.toISOString()} onPress={() => navigate('habit', { date: date.toISOString() })} />
+            const dayWithHabits = summary.find(day => {
+              return dayjs(date).isSame(day.date, 'day');
+            })
+
+            return <HabitDay key={date.toISOString()} date={date} amountOfHabits={dayWithHabits?.amount} amountCompleted={dayWithHabits?.completed} onPress={() => navigate('habit', { date: date.toISOString() })} />
           })}
 
           {amountOfDaysToFill > 0 &&
@@ -48,6 +91,7 @@ export default function Home() {
               );
             })}
         </View>
+        }
       </ScrollView>
     </View>
   );
